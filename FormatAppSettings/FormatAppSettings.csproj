@@ -41,7 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormatAppSettings.cs" />
+    <Compile Include="AppSettingsFormatter.cs" />
     <Compile Include="given_an_appsettings_file.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

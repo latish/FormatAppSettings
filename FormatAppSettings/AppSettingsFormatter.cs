@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 
 namespace FormatAppSettings
@@ -12,12 +9,26 @@ namespace FormatAppSettings
         public string Tidy(string inputXml)
         {
             var xmlDoc = XDocument.Parse(inputXml,LoadOptions.PreserveWhitespace);
-            var elements = xmlDoc.Elements().First().Elements();
-            elements = elements.OrderBy(element => (string)element.Attribute("env")).OrderBy(element => (string)element.Attribute("key")).ToList();
-            xmlDoc.Elements().First().Elements().Remove();
-            xmlDoc.Elements().First().Add(elements);
+            xmlDoc.Elements().First().ReplaceWith(GetOrderedElement(xmlDoc.Elements().First()));
+            return xmlDoc.Declaration + xmlDoc.ToString(SaveOptions.DisableFormatting);;
+        }
 
-            return xmlDoc.Declaration + xmlDoc.ToString(SaveOptions.DisableFormatting);
+        private XElement GetOrderedElement(XElement element)
+        {
+            var elements = element.Elements();
+            elements = elements.OrderBy(e => (string)e.Attribute("env")).
+                OrderBy(e => (string)e.Attribute("key")).
+                OrderBy(e=>e.Name.LocalName).
+                ToList();
+            
+            foreach (var el in elements.Where(ele => ele.HasElements))
+            {
+                el.ReplaceWith(GetOrderedElement(el));
+            }
+
+            element.ReplaceNodes(elements);
+            return element;
+            
         }
     }
 }

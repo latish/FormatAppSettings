@@ -6,27 +6,32 @@ namespace FormatAppSettings
 {
     public class AppSettingsFormatter
     {
-        public string Tidy(string inputXml)
+        public string Tidy(string inputXml, SaveOptions saveOptions)
         {
             var xmlDoc = XDocument.Parse(inputXml,LoadOptions.PreserveWhitespace);
             xmlDoc.Elements().First().ReplaceWith(GetOrderedElement(xmlDoc.Elements().First()));
-            return xmlDoc.Declaration + xmlDoc.ToString(SaveOptions.DisableFormatting);;
+            return xmlDoc.Declaration + xmlDoc.ToString(saveOptions);
+        }
+
+        public string Tidy(string inputXml)
+        {
+            return Tidy(inputXml, SaveOptions.None);
         }
 
         private XElement GetOrderedElement(XElement element)
         {
-            var elements = element.Elements();
-            elements = elements.OrderBy(e => (string)e.Attribute("env")).
+            var childElements = element.Elements();
+            childElements = childElements.OrderBy(e => (string)e.Attribute("env")).
                 OrderBy(e => (string)e.Attribute("key")).
                 OrderBy(e=>e.Name.LocalName).
                 ToList();
             
-            foreach (var el in elements.Where(ele => ele.HasElements))
+            foreach (var subsidiaryElement in childElements.Where(e => e.HasElements))
             {
-                el.ReplaceWith(GetOrderedElement(el));
+                subsidiaryElement.ReplaceWith(GetOrderedElement(subsidiaryElement));
             }
 
-            element.ReplaceNodes(elements);
+            element.ReplaceNodes(childElements);
             return element;
             
         }

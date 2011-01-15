@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace FormatAppSettings
@@ -9,7 +10,8 @@ namespace FormatAppSettings
         public string Tidy(string inputXml, SaveOptions saveOptions)
         {
             var xmlDoc = XDocument.Parse(inputXml,LoadOptions.PreserveWhitespace);
-            xmlDoc.Elements().First().ReplaceWith(GetOrderedElement(xmlDoc.Elements().First()));
+            var first = xmlDoc.Elements().First();
+            first.ReplaceWith(GetOrderedElement(first));
             return xmlDoc.Declaration + xmlDoc.ToString(saveOptions);
         }
 
@@ -20,20 +22,37 @@ namespace FormatAppSettings
 
         private XElement GetOrderedElement(XElement element)
         {
-            var childElements = element.Elements();
-            childElements = childElements.OrderBy(e => (string)e.Attribute("env")).
-                OrderBy(e => (string)e.Attribute("key")).
-                OrderBy(e=>e.Name.LocalName).
-                ToList();
-            
-            foreach (var subsidiaryElement in childElements.Where(e => e.HasElements))
+            var children = element.Nodes().ToList();
+            var childElements = children.OfType<XElement>().
+                                            OrderBy(e => (string)e.Attribute("env")).
+                                            OrderBy(e => (string)e.Attribute("key")).
+                                            OrderBy(e => e.Name.LocalName).
+                                            ToList();
+
+            var newChildren = childElements.Cast<XNode>().ToList();
+            var comments = children.OfType<XComment>().ToList();
+
+            newChildren = ProcessComments(comments, newChildren);
+
+            foreach (var subsidiaryElement in newChildren.OfType<XElement>().Where(e => e.HasElements))
             {
                 subsidiaryElement.ReplaceWith(GetOrderedElement(subsidiaryElement));
             }
 
-            element.ReplaceNodes(childElements);
+            element.ReplaceNodes(newChildren);
             return element;
-            
+        }
+
+        private List<XNode> ProcessComments(IEnumerable<XComment> comments, List<XNode> newChildren)
+        {
+            foreach (var comment in comments)
+            {
+                if (comment.PreviousNode != null && comment.PreviousNode.NodeType == XmlNodeType.Element)
+                    newChildren.Insert(newChildren.IndexOf(comment.PreviousNode) - 1, comment);
+                else if (comment.NextNode != null && comment.NextNode.NodeType == XmlNodeType.Element)
+                    newChildren.Insert(newChildren.IndexOf(comment.NextNode), comment);
+            }
+            return newChildren;
         }
     }
 }

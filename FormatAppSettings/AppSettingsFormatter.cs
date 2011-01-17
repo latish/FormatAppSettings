@@ -47,10 +47,12 @@ namespace FormatAppSettings
         {
             foreach (var comment in comments)
             {
-                if (comment.PreviousNode != null && comment.PreviousNode.NodeType == XmlNodeType.Element)
-                    newChildren.Insert(newChildren.IndexOf(comment.PreviousNode) - 1, comment);
-                else if (comment.NextNode != null && comment.NextNode.NodeType == XmlNodeType.Element)
-                    newChildren.Insert(newChildren.IndexOf(comment.NextNode), comment);
+                var nextElement = comment.ElementsAfterSelf().FirstOrDefault();
+                var prevElement = comment.ElementsBeforeSelf().LastOrDefault();
+                if (nextElement != null && (newChildren.IndexOf(nextElement)!=-1))
+                    newChildren.Insert(newChildren.IndexOf(nextElement), comment);
+                else if (prevElement != null && newChildren.IndexOf(prevElement)!=-1)
+                    newChildren.Insert(newChildren.IndexOf(prevElement) - 1, comment);
             }
             return newChildren;
         }

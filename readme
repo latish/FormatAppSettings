@@ -1,0 +1,1 @@
+This is a small Visual Studio plugin I created to make config files more maintainable at a client. The code goes through a config files and sorts the elements in alphabetical order based on the attribute values.

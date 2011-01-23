@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace FormatAppSettings
+namespace FormatAppSettingsPlugin
 {
     [TestClass]
     public class given_an_appsettings_file

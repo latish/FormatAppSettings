@@ -1,12 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
 
-namespace FormatAppSettings
+
+namespace FormatAppSettingsPlugin
 {
+    ///<summary>
+    ///Formats a XML file by ordering it's child elements in alphabetical order
+    /// based on attribute keys.
+    ///</summary>
     public class AppSettingsFormatter
     {
+        ///<summary>
+        /// Tidies the XML file by formatting it in alphabetical order.
+        ///</summary>
+        ///<param name="inputXml"></param>
+        ///<param name="saveOptions">Allows choosing between formatted/non-formatter output</param>
+        ///<returns></returns>
         public string Tidy(string inputXml, SaveOptions saveOptions)
         {
             var xmlDoc = XDocument.Parse(inputXml,LoadOptions.PreserveWhitespace);
@@ -15,6 +25,11 @@ namespace FormatAppSettings
             return xmlDoc.Declaration + xmlDoc.ToString(saveOptions);
         }
 
+        ///<summary>
+        /// Tidies the Xml by formatting it in alphabetical order.
+        ///</summary>
+        ///<param name="inputXml"></param>
+        ///<returns></returns>
         public string Tidy(string inputXml)
         {
             return Tidy(inputXml, SaveOptions.None);
